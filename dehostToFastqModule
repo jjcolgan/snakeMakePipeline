@@ -1,0 +1,78 @@
+rule bowtie_dehost:
+    input:
+     	R1 = "/scratch/midway3/jjcolgan/trimmedReads/{sample}_R1_001_trimmed.fastq.gz",
+		R2 = "/scratch/midway3/jjcolgan/trimmedReads/{sample}_R2_001_trimmed.fastq.gz",
+		R1Untrimmed = "R1Untrimmed = "/project/blekhman/jjcolgan/metatranscriptome/trimmedReads/{sample}_R1_001_untrimmed.fastq.gz",
+        R2Untrimmed =  "/project/blekhman/jjcolgan/metatranscriptome/trimmedReads/{sample}_R2_001_untrimmed.fastq.gz"
+                
+    output:
+        sam = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}MappedAndUnmapped.sam"
+    threads: 8
+    shell: 
+        """
+        bowtie2 -p {threads} -x /project/blekhman/jjcolgan/bowtieIndex/grch38_1kgmaj \
+        -1 {input.R1} \
+        -2 {input.R2} \
+        -S {output.R1}
+        rm {input.R1Untrimmed}
+        rm {input.R2UnTrimmed}
+        if [[ -f output.sam]]
+        then 
+        	rm {input.R1}
+        	rm {input.R2}
+        fi
+        """
+rule convert_to_bam:
+	input :
+		input.sam = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}MappedAndUnmapped.sam"
+	output:
+		output.bam = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}MappedAndUnmapped.bam"
+
+	shell 
+		"""
+		samtools view -bS {input.sam} > {output.bam}
+		if [[-f {output.bam}]]
+		then 
+			rm {input.sam}
+		fi
+		"""
+rule filter_unmapped:
+	input:
+		input.both = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}MappedAndUnmapped.bam"
+	output:
+		output.filtered = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}Unmapped.bam
+	shell:
+		"""
+		samtools view -b -f 12 -F 256 {input.both} > {output.filtered}
+		if [[ -f {output.filtered}]]
+		then 
+			rm {input.both}
+		fi
+		"""
+rule sort:
+	input:
+		unsorted = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}Unmapped.bam"
+	output:
+		sorted = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}UnmappedSorted.bam"
+	shell:
+		"""
+		sam tools sort -n {input.unsorted} -o {output.sorted}
+		if [[-f {output.sorted}]]
+		then 
+			rm {input.unsorted}
+		fi
+		"""
+rule convert:
+	input:
+		sorted = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}UnmappedSorted.bam"
+	output:
+		R1 = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R1_001.fastq.gz"
+		R2 = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R2_001.fastq.gz"
+	shell:
+		"""
+		bedtools bamtofastq -i {input.sorted} -fq {output.R1} -fq2 {output.R2}
+		if [[-f {output.R1}]]
+		then 
+			rm {input.sorted}
+		fi
+		"""
