@@ -1,0 +1,4 @@
+rule merge_profiles 
+	output = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/mergedProfile.txt"
+	shell = 
+		"merge_metaphlan_tables.py *Profile.txt > {output.profile}"
