@@ -1,0 +1,9 @@
+rule run_metaphlan:
+	input:
+		R1 = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R1_001.fastq"
+		R2 = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R2_001.fastq"
+	output: 
+		bowtie2out = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}.bowtie2.bz2"
+		profile = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}profiled.txt" 
+	shell = 
+		"metaphlan {input.R1}, {input.R2} --input_type fastq --unclassified_estimation --bowtie2out {bowtie2out} --nproc 5 --index PATH-TO-HUMANN-DB -{outputl.profile}"
