@@ -1,0 +1,78 @@
+rule bowtie_dehost:
+    input:
+     	R1 = "/trimmedReads/{sample}_R1_001_trimmed.fastq.gz",
+		R2 = "/trimmedReads/{sample}_R2_001_trimmed.fastq.gz",
+		R1Untrimmed = "/trimmedReads/{sample}_R1_001_untrimmed.fastq.gz",
+        R2Untrimmed = "/trimmedReads/{sample}_R2_001_untrimmed.fastq.gz"
+                
+    output:
+        sam = "deRrna/{sample}MappedAndUnmapped.sam"
+    threads: 8
+    shell: 
+        """
+        bowtie2 -p {threads} -x /path/to/rrna/db \
+        -1 {input.R1} \
+        -2 {input.R2} \
+        -S {output.R1}
+        rm {input.R1Untrimmed}
+        rm {input.R2UnTrimmed}
+        if [[ -f output.sam]]
+        then 
+        	rm {input.R1}
+        	rm {input.R2}
+        fi
+        """
+rule convert_to_bam:
+	input :
+		input.sam = "deRrna/{sample}MappedAndUnmapped.sam"
+	output:
+		output.bam = "deRrna/{sample}MappedAndUnmapped.bam"
+
+	shell 
+		"""
+		samtools view -bS {input.sam} > {output.bam}
+		if [[-f {output.bam}]]
+		then 
+			rm {input.sam}
+		fi
+		"""
+rule filter_unmapped:
+	input:
+		input.both = "deRrna/{sample}MappedAndUnmapped.bam"
+	output:
+		output.filtered = "deRrna/{sample}Unmapped.bam
+	shell:
+		"""
+		samtools view -b -f 12 -F 256 {input.both} > {output.filtered}
+		if [[ -f {output.filtered}]]
+		then 
+			rm {input.both}
+		fi
+		"""
+rule sort:
+	input:
+		unsorted = "deRrna/{sample}Unmapped.bam"
+	output:
+		sorted = "deRrna/{sample}UnmappedSorted.bam"
+	shell:
+		"""
+		sam tools sort -n {input.unsorted} -o {output.sorted}
+		if [[-f {output.sorted}]]
+		then 
+			rm {input.unsorted}
+		fi
+		"""
+rule convert:
+	input:
+		sorted = "deRrna/{sample}UnmappedSorted.bam"
+	output:
+		R1 = "deRrna/{sample}_R1_001.fastq.gz"
+		R2 = "deRrna/{sample}_R2_001.fastq.gz"
+	shell:
+		"""
+		bedtools bamtofastq -i {input.sorted} -fq {output.R1} -fq2 {output.R2}
+		if [[-f {output.R1}]]
+		then 
+			rm {input.sorted}
+		fi
+		"""
