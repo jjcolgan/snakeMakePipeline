@@ -1,0 +1,12 @@
+rule decompress:
+	input:
+		compressedR1 = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R1_001.fastq.gz"
+		compressedR2 = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R2_001.fastq.gz"
+	output:
+		decompressedR1 = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R2_001.fastq"
+		decompressedR2 = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}_R2_001.fastq"
+	shell: 
+		"""
+		gzip -d {input.compressedR1}
+		gzip -d {input.compressedR2}
+		"""
