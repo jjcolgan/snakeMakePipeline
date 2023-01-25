@@ -1,0 +1,24 @@
+rule bowtie_dehost:
+    input:
+     	R1 = "/scratch/midway3/jjcolgan/trimmedReads/{sample}_R1_001_trimmed.fastq.gz",
+		R2 = "/scratch/midway3/jjcolgan/trimmedReads/{sample}_R2_001_trimmed.fastq.gz",
+		R1Untrimmed = "R1Untrimmed = "/project/blekhman/jjcolgan/metatranscriptome/trimmedReads/{sample}_R1_001_untrimmed.fastq.gz",
+        R2Untrimmed =  "/project/blekhman/jjcolgan/metatranscriptome/trimmedReads/{sample}_R2_001_untrimmed.fastq.gz"
+                
+    output:
+        sam = "/project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}MappedAndUnmapped.sam"
+    threads: 8
+    shell: 
+        """
+        bowtie2 -p {threads} -x /project/blekhman/jjcolgan/bowtieIndex/grch38_1kgmaj \
+        -1 {input.R1} \
+        -2 {input.R2} \
+        -S {output.R1}
+        rm {input.R1Untrimmed}
+        rm {input.R2UnTrimmed}
+        if [[ -f output.sam]]
+        then 
+        	rm {input.R1}
+        	rm {input.R2}
+        fi
+        """
