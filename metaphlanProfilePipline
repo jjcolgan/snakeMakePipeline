@@ -1,0 +1,9 @@
+rule all:
+    input:
+		"project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/mergedProfile.txt"
+includes:
+    "path/to/trimModule"
+    "path/to/dehostTofastqModule"
+    "path/to/trimModule"
+    "path/to/runMetaphlanModule"
+    "path/to/mergeProfileModule"
