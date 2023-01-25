@@ -1,0 +1,22 @@
+rule trim:
+    input:
+		    R1 ="/{sample}_R1_001.fastq.gz",
+        R2 ="/{sample}_R2_001.fastq.gz"
+    output:
+            R1Trimmed = "/trimmedReads/{sample}_R1_001_trimmed.fastq.gz",
+            R1Untrimmed = "/trimmedReads/{sample}_R1_001_untrimmed.fastq.gz",
+            R2Trimmed = "/trimmedReads/{sample}_R2_001_trimmed.fastq.gz",
+            R2Untrimmed = "/trimmedReads/{sample}_R2_001_untrimmed.fastq.gz"
+        threads:24
+        shell:
+            """
+            module load java
+            java -jar /Trimmomatic-0.39/trimmomatic-0.39.jar PE -threads {threads} -phred33 \
+            {input.R1} \
+            {input.R2} \
+            {output.R1Trimmed} \
+            {output.R1Untrimmed} \
+            {output.R2Trimmed} \
+            {output.R2Untrimmed} \
+            /Trimmomatic-0.39/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:10 MINLEN:25
+            """	
