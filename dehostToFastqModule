@@ -16,11 +16,8 @@ rule bowtie_dehost:
         -S {output.R1}
         rm {input.R1Untrimmed}
         rm {input.R2UnTrimmed}
-        if [[ -f output.sam]]
-        then 
-        	rm {input.R1}
-        	rm {input.R2}
-        fi
+        rm {input.R1}
+        rm {input.R2}
         """
 rule convert_to_bam:
 	input :
@@ -31,10 +28,7 @@ rule convert_to_bam:
 	shell 
 		"""
 		samtools view -bS {input.sam} > {output.bam}
-		if [[-f {output.bam}]]
-		then 
-			rm {input.sam}
-		fi
+		rm {input.sam}
 		"""
 rule filter_unmapped:
 	input:
@@ -44,10 +38,7 @@ rule filter_unmapped:
 	shell:
 		"""
 		samtools view -b -f 12 -F 256 {input.both} > {output.filtered}
-		if [[ -f {output.filtered}]]
-		then 
-			rm {input.both}
-		fi
+		rm {input.both}
 		"""
 rule sort:
 	input:
@@ -57,10 +48,7 @@ rule sort:
 	shell:
 		"""
 		sam tools sort -n {input.unsorted} -o {output.sorted}
-		if [[-f {output.sorted}]]
-		then 
-			rm {input.unsorted}
-		fi
+		rm {input.unsorted}
 		"""
 rule convert:
 	input:
@@ -71,8 +59,5 @@ rule convert:
 	shell:
 		"""
 		bedtools bamtofastq -i {input.sorted} -fq {output.R1} -fq2 {output.R2}
-		if [[-f {output.R1}]]
-		then 
-			rm {input.sorted}
-		fi
+		rm {input.sorted}
 		"""
