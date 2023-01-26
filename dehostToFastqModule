@@ -1,8 +1,8 @@
 rule bowtie_dehost:
     input:
      	R1 = "/scratch/midway3/jjcolgan/trimmedReads/{sample}_R1_001_trimmed.fastq.gz",
-		R2 = "/scratch/midway3/jjcolgan/trimmedReads/{sample}_R2_001_trimmed.fastq.gz",
-		R1Untrimmed = "R1Untrimmed = "/project/blekhman/jjcolgan/metatranscriptome/trimmedReads/{sample}_R1_001_untrimmed.fastq.gz",
+	R2 = "/scratch/midway3/jjcolgan/trimmedReads/{sample}_R2_001_trimmed.fastq.gz",
+	R1Untrimmed = "R1Untrimmed = "/project/blekhman/jjcolgan/metatranscriptome/trimmedReads/{sample}_R1_001_untrimmed.fastq.gz",
         R2Untrimmed =  "/project/blekhman/jjcolgan/metatranscriptome/trimmedReads/{sample}_R2_001_untrimmed.fastq.gz"
                 
     output:
