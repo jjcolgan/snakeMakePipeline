@@ -16,9 +16,6 @@ rule bowtie_dehost:
         -S {output.R1}
         rm {input.R1Untrimmed}
         rm {input.R2UnTrimmed}
-        if [[ -f output.sam]]
-        then 
-        	rm {input.R1}
-        	rm {input.R2}
-        fi
+       	rm {input.R1}
+        rm {input.R2}
         """
