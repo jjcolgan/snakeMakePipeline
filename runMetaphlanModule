@@ -6,4 +6,8 @@ rule run_metaphlan:
 		bowtie2out = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}.bowtie2.bz2"
 		profile = "project/blekhman/jjcolgan/metagenome/pool1/snakemaketest/{sample}profiled.txt" 
 	shell = 
-		"metaphlan {input.R1}, {input.R2} --input_type fastq --unclassified_estimation --bowtie2out {bowtie2out} --nproc 5 --index PATH-TO-HUMANN-DB -{outputl.profile}"
+		"""
+		metaphlan {input.R1}, {input.R2} --input_type fastq --unclassified_estimation --bowtie2out {bowtie2out} --nproc 5 --index PATH-TO-HUMANN-DB -{outputl.profile}
+		gzip {input.R1}
+		gzip {input.R2}
+		"""
