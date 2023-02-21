@@ -1,21 +1,21 @@
-input = open('log', 'r')
+input = open("log", "r")
 input = input.read()
-SAMPLE = input.split('\n')
+SAMPLE = input.split("\n")
 del SAMPLE[len(SAMPLE)-1]
 rule all:
 	input:
-		"/project/blekhman/jjcolgan/testFull/humannOutput/joined_gene_families.tsv",
-		"/project/blekhman/jjcolgan/testFull/humannOutput/joined_path_coverage.tsv",
-		"/project/blekhman/jjcolgan/testFull/humannOutput/joined_path_abundance.tsv",
+		geneFamiles = expand("/project/blekhman/jjcolgan/testFull/humannOutput/{sample}_genefamilies.tsv", sample = SAMPLE),
+		pathAbudance = expand("/project/blekhman/jjcolgan/testFull/humannOutput/{sample}_pathabundance.tsv", sample = SAMPLE),
+		pathCoverage = expand("/project/blekhman/jjcolgan/testFull/humannOutput/{sample}_pathcoverage.tsv", sample = SAMPLE)
 rule trim:
 	input:
 		R1 ="/project/blekhman/sjarif/konzo/raw_data/Blekhman2_Project_002/{sample}_R1_001.fastq.gz",
 		R2 ="/project/blekhman/sjarif/konzo/raw_data/Blekhman2_Project_002/{sample}_R2_001.fastq.gz"
 	output:
-		R1Trimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001_trimmed.fastq.gz",
-		R1Untrimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001_untrimmed.fastq.gz",
-		R2Trimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001_trimmed.fastq.gz",
-		R2Untrimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001_untrimmed.fastq.gz"
+		R1Trimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001_trimmed.fastq.gz",
+		R1Untrimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001_untrimmed.fastq.gz",
+		R2Trimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001_trimmed.fastq.gz",
+		R2Untrimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001_untrimmed.fastq.gz"
 	threads:24
 	shell:
 		"""
@@ -31,13 +31,13 @@ rule trim:
 		"""
 rule bowtie_dehost:
 	input:
-		R1Trimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001_trimmed.fastq.gz",
-		R1Untrimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001_untrimmed.fastq.gz",
-		R2Trimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001_trimmed.fastq.gz",
-		R2Untrimmed = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001_untrimmed.fastq.gz"
+		R1Trimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001_trimmed.fastq.gz",
+		R1Untrimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001_untrimmed.fastq.gz",
+		R2Trimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001_trimmed.fastq.gz",
+		R2Untrimmed = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001_untrimmed.fastq.gz"
 
 	output:
-		sam = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.sam"
+		sam = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.sam"
 	threads: 8
 	shell:
 		"""
@@ -52,9 +52,9 @@ rule bowtie_dehost:
 		"""
 rule convert_to_bam_dehost:
 	input:
-		sam = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.sam"
+		sam = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.sam"
 	output:
-		bam = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.bam"
+		bam = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.bam"
 	shell:
 		"""
 		samtools view -bS {input.sam} > {output.bam}
@@ -62,10 +62,10 @@ rule convert_to_bam_dehost:
 		"""
 rule filter_unmapped_dehost:
 	input:
-		both = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.bam"
+		both = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}MappedAndUnmapped.bam"
 
 	output:
-		filtered = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}Unmapped.bam"
+		filtered = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}Unmapped.bam"
 	shell:
 		"""
 		samtools view -b -f 12 -F 256 {input.both} -o {output.filtered}
@@ -73,9 +73,9 @@ rule filter_unmapped_dehost:
 		"""
 rule sort_dehost:
 	input:
-		unsorted = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}Unmapped.bam"
+		unsorted = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}Unmapped.bam"
 	output:
-		sorted = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}UnmappedSorted.bam"
+		sorted = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}UnmappedSorted.bam"
 	shell :
 		"""
 		samtools sort -n {input.unsorted} -o {output.sorted}
@@ -83,10 +83,10 @@ rule sort_dehost:
 		"""
 rule covert_dehost:
 	input:
-		sorted = "/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}UnmappedSorted.bam"
+		sorted = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}UnmappedSorted.bam"
 	output:
-		R1 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001.fastq',
-		R2 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001.fastq'
+		R1 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001.fastq",
+		R2 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001.fastq"
 	shell:
 		"""
 		bedtools bamtofastq -i {input.sorted} -fq {output.R1} -fq2 {output.R2}
@@ -94,11 +94,11 @@ rule covert_dehost:
 		"""
 rule zip_dehost:
 	input:
-		R1 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001.fastq',
-		R2 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001.fastq'
+		R1 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001.fastq",
+		R2 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001.fastq"
 	output: 
-		R1 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001.fastq.gz',
-		R2 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001.fastq.gz'
+		R1 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001.fastq.gz",
+		R2 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001.fastq.gz"
 	shell:
 		"""
 		gzip {input.R1}
@@ -106,16 +106,16 @@ rule zip_dehost:
 		"""
 rule bowtie_derrna:
 	input:
-		R1 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R1_001.fastq.gz',
-		R2 = '/project/blekhman/jjcolganjjcolgan/testFull/dehosted/{sample}_R2_001.fastq.gz'
+		R1 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R1_001.fastq.gz",
+		R2 = "/project/blekhman/jjcolgan/testFull/dehosted/{sample}_R2_001.fastq.gz"
 	output:
-		sam = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}MappedAndUnmapped.sam"
+		sam = "/project/blekhman/jjcolgan/testFull/derrna/{sample}.sam"
 	threads: 8
 	shell:
 		""""
-		bowtie2 -p {threads} -x /project/blekhman/jjcolgan/bowtieIndex/grch38_1kgmaj \
-		-1 {input.R1Trimmed} \
-		-2 {input.R2Trimmed} \
+		bowtie2 -p {threads} -x /project/blekhman/jjcolgan/rrnaDb/16sArcAndBacDb \
+		-1 {input.R1} \
+		-2 {input.R2} \
 		-S {output.sam}
 		rm {input.R1}
 		rm {input.R2}
@@ -123,20 +123,20 @@ rule bowtie_derrna:
 		
 rule convert_to_bam_derrna:
 	input:
-		sam = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}MappedAndUnmapped.sam"
+		sam = "/project/blekhman/jjcolgan/testFull/derrna/{sample}.sam"
 	output:
-		bam = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}MappedAndUnmapped.bam"
+		bam = "/project/blekhman/jjcolgan/testFull/derrna/{sample}MappedAndUnmapped.bam"
 	shell:
 		"""
 		samtools view -bS {input.sam} > {output.bam}
 		rm {input.sam}
 		"""
-rule filter_unmapped_dehost:
+rule filter_unmapped_derrna:
 	input:
-		both = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}MappedAndUnmapped.bam"
+		both = "/project/blekhman/jjcolgan/testFull/derrna/{sample}MappedAndUnmapped.bam"
 
 	output:
-		filtered = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}Unmapped.bam"
+		filtered = "/project/blekhman/jjcolgan/testFull/derrna/{sample}Filtered.bam"
 	shell:
 		"""
 		samtools view -b -f 12 -F 256 {input.both} -o {output.filtered}
@@ -144,9 +144,9 @@ rule filter_unmapped_dehost:
 		"""
 rule sort_dehost_derrna:
 	input:
-		unsorted = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}Unmapped.bam"
+		unsorted = "/project/blekhman/jjcolgan/testFull/derrna/{sample}Filtered.bam"
 	output:
-		sorted = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}UnmappedSorted.bam"
+		sorted = "/project/blekhman/jjcolgan/testFull/derrna/{sample}UnmappedSorted.bam"
 	shell :
 		"""
 		samtools sort -n {input.unsorted} -o {output.sorted}
@@ -154,10 +154,10 @@ rule sort_dehost_derrna:
 		"""
 rule covert_dehost_derrna:
 	input:
-		sorted = "/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}UnmappedSorted.bam"
+		sorted = "/project/blekhman/jjcolgan/testFull/derrna/{sample}UnmappedSorted.bam"
 	output:
-		R1 = '/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}_R1_001.fastq',
-		R2 = '/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}_R2_001.fastq'
+		R1 = "/project/blekhman/jjcolgan/testFull/derrna/{sample}_R1_001.fastq",
+		R2 = "/project/blekhman/jjcolgan/testFull/derrna/{sample}_R2_001.fastq"
 	shell:
 		"""
 		bedtools bamtofastq -i {input.sorted} -fq {output.R1} -fq2 {output.R2}
@@ -165,11 +165,11 @@ rule covert_dehost_derrna:
 		"""
 rule zip_dehost_derrna:
 	input:
-		R1 = '/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}_R1_001.fastq',
-		R2 = '/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}_R2_001.fastq'
+		R1 = "/project/blekhman/jjcolgan/testFull/derrna/{sample}_R1_001.fastq",
+		R2 = "/project/blekhman/jjcolgan/testFull/derrna/{sample}_R2_001.fastq"
 	output: 
-		R1 = '/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}_R1_001.fastq.gz',
-		R2 = '/project/blekhman/jjcolganjjcolgan/testFull/derrna/{sample}_R2_001.fastq.gz'
+		R1 = "/project/blekhman/jjcolgan/testFull/derrna/{sample}_R1_001.fastq.gz",
+		R2 = "/project/blekhman/jjcolgan/testFull/derrna/{sample}_R2_001.fastq.gz"
 	shell:
 		"""
 		gzip {input.R1}
@@ -194,7 +194,7 @@ rule mergeFastq:
 		R1 ="/project/blekhman/jjcolgan/testFull/derrna/{sample}_R1_001.fastq.gz",
 		R2 = "/project/blekhman/jjcolgan/testFull/derrna/{sample}_R2_001.fastq.gz"
 	output:
-			merged = "/project/blekhman/jjcolgan/testFull/derrna/{sample}Merged.fastq.gz"
+			merged = "/project/blekhman/jjcolgan/testFull/merged/{sample}.fastq.gz"
 	shell:
 		"""
 		cat {input.R1} > {output.merged}
@@ -204,30 +204,15 @@ rule mergeFastq:
 		"""
 rule humann3:
 	input:
-		merged = "/project/blekhman/jjcolgan/testFull/derrna/{sample}Merged.fastq.gz",
+		merged = "/project/blekhman/jjcolgan/testFull/merged/{sample}.fastq.gz",
 		profile ="/project/blekhman/jjcolgan/testFull/profiles/{sample}Profile.txt"
 
 	output:
-		geneFamiles = '/project/blekhman/jjcolgan/testFull/humannOutput/{sample}Merged_genefamilies.tsv',
-		pathAbudance = '/project/blekhman/jjcolgan/testFull/humannOutput/{sample}Merged_pathabundance.tsv',
-		pathCoverage = '/project/blekhman/jjcolgan/testFull/humannOutput/{sample}Merged_pathcoverage.tsv'
+		geneFamiles = "/project/blekhman/jjcolgan/testFull/humannOutput/{sample}_genefamilies.tsv",
+		pathAbudance = "/project/blekhman/jjcolgan/testFull/humannOutput/{sample}_pathabundance.tsv",
+		pathCoverage = "/project/blekhman/jjcolgan/testFull/humannOutput/{sample}_pathcoverage.tsv"
 	shell:
 		"""
 		humann --nucleotide-database /project/blekhman/jjcolgan/humannDatabases/chocophlan --taxonomic-profile {input.profile} --protein-database \
 		/project/blekhman/jjcolgan/humannDatabases/uniref50/uniref --threads 8 -i {input.merged} -o /project/blekhman/jjcolgan/testFull/humannOutput
-		"""
-rule join_tables:
-	input:
-		dir = '/project/blekhman/jjcolgan/testFull/humannOutput/',
-		pathAbundance = expand("/project/blekhman/jjcolgan/testFull/humannOutput/{sample}Merged_pathabundance_cpm.tsv",sample = SAMPLE),
-		geneFamilies = expand("/project/blekhman/jjcolgan/testFull/humannOutput/{sample}Merged_genefamilies_cpm.tsv", sample =SAMPLE)
-	output:
-		geneFamilies = "/project/blekhman/jjcolgan/testFull/humannOutput/joined_gene_families.tsv",
-		pathAbundance = "/project/blekhman/jjcolgan/testFull/humannOutput/joined_path_abundance.tsv",
-		pathCoverage = "/project/blekhman/jjcolgan/testFull/humannOutput/joined_path_coverage.tsv"
-	shell:
-		"""
-		humann_join_tables --input {input.dir} --output {output.geneFamilies} --file_name Merged_genefamilies_cpm
-		humann_join_tables --input {input.dir} --output {output.pathAbundance} --file_name Merged_pathabundance_cpm
-		humann_join_tables --input {input.dir} --output {output.pathCoverage} --file_name Merged_pathcoverage
 		"""
